@@ -2,10 +2,32 @@
 #include <random>
 #include <fstream>
 
-const unsigned int startAdress = 0x200; //Reason being the space needed for the interpreter, it should ocuppy from 0x000 to 0x1FF (511);
 
 class Chip8{
+   
    public:
+
+   Chip8::Chip8(){
+      //So, I don't quite understand yet why do I need the constructor to set everything to it's starting value, but since my reference did it
+      //for now I'll simply use it too, but set the values to what I understand they should be
+
+      PC = 0x200; //Since 0x1FF is the last bit reserved to the interpreter, this should be the first for the instructions
+      opcode = 0; 
+      //still wondering if I need to simulate the binary code in opcode, like 8xy4 -> 1000 0000 0001 0100 which if I understood means:
+      // Set V0 = V0 + V1 (ADD Vx, Vy)
+      I = 0;
+      SP = 0;
+
+      for(int i = 0; i < 0x1000; i++) memory[i] = 0;
+      for(int i = 0; i < 2048; i++) graphics[i] = 0;
+      for(int i = 0; i < 16; i++){
+         V[i] = 0;
+         Stack[i] = 0;
+      }
+
+   }
+   
+
    void loadRom(const char* fileName){
 
       std::ifstream file(fileName, std::ios::binary, std::ios::ate);
@@ -24,18 +46,18 @@ class Chip8{
          //imediatelly after
       }
    }
-   void cycle();
+   void cycle(){
+      //Ok, based on what I've learned so far, I'll need to code the Fetch Decode Execute sequence here, but first I gotta understand how to
+      //manipulate the memory
+   };
 
-   uint8_t gfx[64 * 32];
+   uint8_t graphics[64 * 32];
    uint8_t keypad[16];
 
    private:
    
-   
-   uint8_t opcode;
-   
-   uint8_t memory[4096], V[16], DT, ST, SP;
-   uint16_t I, PC, Stack[16];
+   uint8_t memory[4096], V[16], DT, ST;
+   uint16_t I, PC, Stack[16], SP, opcode;
 
 
 };
