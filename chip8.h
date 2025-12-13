@@ -2,9 +2,29 @@
 #include <random>
 #include <fstream>
 
-
 class Chip8{
+
+
+   //Not sure how would I read the opcode yet, but thought it would be nice to have the codes ready for when I do
+   //Hopefully I make them right on  my first try 
+
+   void ZeroNNN(uint16_t N){//SYS addr, jump to a machine code routine at NNN; ignored in modern interpreters
+      PC = N;
+   }
    
+   void ZeroZeroEZero(){//CLS, clear the display; I assume reseting should do it?
+      for(int i = 0; i < 2048; i++) graphics[i] = 0;
+   }
+
+   void ZeroZeroEE(){//RET, return 
+      PC = SP; //Still quite confusing how to make the Return, gonna leave it at that for now, maybe I gotta look a bit into assembly
+      SP -= 1;
+   }
+
+   void OneNNN(int NNN){//JP addr, jump to location NNN seems like the same as 0NNN?? Could it be why it's ignored in modern interpreters?
+      PC = NNN;
+   }
+
    public:
 
    Chip8::Chip8(){
@@ -30,7 +50,8 @@ class Chip8{
 
    void loadRom(const char* fileName){
 
-      std::ifstream file(fileName, std::ios::binary, std::ios::ate);
+      std::ifstream file(fileName, std::ios::binary, std::ios::ate); //still don't understand why does it give me an error here, what's wrong 
+      //with fileName?
 
       if(file.is_open()){
          std::streampos size = file.tellg(); //since I opened the file from the end this should give me the size. Hopefully
@@ -51,7 +72,7 @@ class Chip8{
       //manipulate the memory
    };
 
-   uint8_t graphics[64 * 32];
+   uint32_t graphics[2048];
    uint8_t keypad[16];
 
    private:
