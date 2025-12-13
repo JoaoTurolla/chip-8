@@ -6,14 +6,14 @@ https://cplusplus.com/reference/fstream last access: 2025-12-11
 
 -Austin Morlan guide to emulating a chip-8 in C++:
 
-https://austinmorlan.com/posts/chip8_emulator/?ref=codebldr last access: 2025-12-11
+https://austinmorlan.com/posts/chip8_emulator/?ref=codebldr last access: 2025-12-13
 
 Notes: I'll use this one mainly to check the graphics and file handling code as I know nothing about graphics and just a little of file handling
 
 
 -Cowgod's Chip-8 Technical Reference v1.0:
 
-http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.0 last access: 2025-12-11
+http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.0 last access: 2025-12-13
 
 Notes: This technical reference will be my main source of info for the challenge, may change it as I see fit while
 looking for more documention on Chip-8, if I do change it there will be updates and additions to this file, but never
