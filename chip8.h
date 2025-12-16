@@ -8,21 +8,77 @@ class Chip8{
    //Not sure how would I read the opcode yet, but thought it would be nice to have the codes ready for when I do
    //Hopefully I make them right on  my first try 
 
-   void ZeroNNN(uint16_t N){//SYS addr, jump to a machine code routine at NNN; ignored in modern interpreters
-      PC = N;
+   void op0NNN(int NNN){//SYS addr, jump to a machine code routine at NNN; ignored in modern interpreters
+      PC = NNN;
    }
    
-   void ZeroZeroEZero(){//CLS, clear the display; I assume reseting should do it?
+   void op00E0(){//CLS, clear the display; I assume reseting should do it?
       for(int i = 0; i < 2048; i++) graphics[i] = 0;
    }
 
-   void ZeroZeroEE(){//RET, return 
+   void op00EE(){//RET, return 
       PC = SP; //Still quite confusing how to make the Return, gonna leave it at that for now, maybe I gotta look a bit into assembly
       SP -= 1;
    }
 
-   void OneNNN(int NNN){//JP addr, jump to location NNN seems like the same as 0NNN?? Could it be why it's ignored in modern interpreters?
+   void op1NNN(int NNN){//JP addr, jump to location NNN seems like the same as 0NNN?? Could it be why it's ignored in modern interpreters?
       PC = NNN;
+   }
+
+   void op2NNN(int NNN){//CALL addr, call subroutine at NNN
+      SP++;
+      Stack[SP] = PC;
+      PC = NNN;
+   }
+
+   void op3XKK(int X, int KK){//SE Vx, byte 
+      if(V[X] = KK) PC += 2;
+   }
+
+   void op4XKK(int X, int KK){//SNE Vx, byte 
+      if(V[X] != KK) PC += 2;
+   }
+
+   void op5XY0(int X, int Y){//SE Vx, Vy
+      if(V[X] == V[Y]) PC+=2;
+   }
+
+   void op6XKK(int X, int KK){//LD Vx, byte
+      V[X] = KK;
+   }
+
+   void op7XKK(int X, int KK){//ADD Vx, byte
+      V[X] += KK;
+   }
+
+   void op8XY0(int X, int Y){//LD Vx, Vy
+      V[X] = V[Y];
+   }
+
+   void op8XY1(int X, int Y){//OR Vx, Vy
+      V[X] = (V[X] | V[Y]);
+   } 
+
+   void op8XY2(int X, int Y){//AND Vx, Vy
+      V[X] = (V[X] & V[Y]);
+   }
+
+   void op8XY3(int X, int Y){//XOR Vx, Vy
+      V[X] = (V[X] | V[Y] & !(V[X] & V[Y]));
+   }
+   
+   void op8XY4(int X, int Y){//ADD Vx, Vy; At this point I'm considering if I should have a return type in all these... might change it soon;
+      V[X] += V[Y];
+      if(V[X] > 255){ 
+         V[15] = 1;
+         V[X] = 255;      
+      }   else V[15] = 0;
+   }
+
+   void op8XY5(int X, int Y){//SUB Vx, Vy
+      if(V[X] > V[Y]) V[15] = 1;
+      else V[15] = 0;
+      V[X] -= V[Y];
    }
 
    public:
