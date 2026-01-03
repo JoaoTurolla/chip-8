@@ -14,7 +14,6 @@ class Chip8{
    uint32_t graphics[2048]{};
    uint8_t keypad[16]{};
 
-
    private:
    
    uint8_t memory[4096]{}, V[16]{}, DT{}, ST{};
