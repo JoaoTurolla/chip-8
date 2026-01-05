@@ -4,7 +4,7 @@
 #include <fstream>
 #include <chrono>
 
-//After working on this for 2 weeks (reason on README) I realised I might've made a mistake and shouldn't have all the code on the hpp file
+//After working on this for 4 weeks (reason on README) I realised I might've made a mistake and shouldn't have all the code on the hpp file
 //It was kind of hard keeping track of what I was declaring and what I needed to define, be it functions or whatever
 //So I decided to split it into two files, one to declare everything, and this one to define everything
 //And now I think I understood why use a constructor 
@@ -203,3 +203,4 @@ void Chip8::op8XY6(){ //SHR Vx, Vy
 
    V[X] >>= 1;// as for this line I had to check on my reference how he did it, it didn't cross my mind to bit shift to make the division.
 }
+
