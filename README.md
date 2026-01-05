@@ -9,4 +9,5 @@ to not depend on Youtube videos that explain how it works, nor any "AI" that cou
 I have extended the time limit for 3 main reasons:
   - Holidays kept me out of the pc more than I wanted
   - Changed OS now I am using an Arch-based Linux distro
-  - I can't commit anymore, I do not understand why git is not allowing me to do it, so I need extra time to figure this out
+- I can't commit anymore, I do not understand why git is not allowing me to do it, so I need extra time to figure this out
+ 
