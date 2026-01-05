@@ -195,7 +195,7 @@ void Chip8::op8XY5(){//SUB Vx, Vy
    V[X] -= V[Y];
 }
 
-void Chip8::op8XY6(){ //SHR Vx, Vy
+void Chip8::op8XY6(){ //SHR Vx
    uint8_t X = (opcode & 0x0F00u) >> 8u;
 
    if(V[X] & 1) V[0x000Fu] = 1;
