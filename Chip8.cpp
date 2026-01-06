@@ -12,6 +12,9 @@
 const unsigned int fontsetSize = 80;
 const unsigned int fontsetStartAddress = 0x50;
 const unsigned int startAddress = 0x200;
+const unsigned int screenWidth = 64;
+const unsigned int screenHeight = 32; 
+ 
 
 uint8_t fontset[fontsetSize] ={
    0xF0, 0x90, 0x90, 0x90, 0xF0,
@@ -195,12 +198,109 @@ void Chip8::op8XY5(){//SUB Vx, Vy
    V[X] -= V[Y];
 }
 
-void Chip8::op8XY6(){ //SHR Vx
+void Chip8::op8XY6(){//SHR Vx
    uint8_t X = (opcode & 0x0F00u) >> 8u;
 
    if(V[X] & 1) V[0x000Fu] = 1;
    else V[0x000fu] = 0; //if the least significant bit is 1, V[F] will be one, otherwise 0.   
 
-   V[X] >>= 1;// as for this line I had to check on my reference how he did it, it didn't cross my mind to bit shift to make the division.
+   V[X] >>= 1u;// as for this line I had to check on my reference how he did it, it didn't cross my mind to bit shift to make the division.
 }
 
+void Chip8::op8XY7(){//SUBN Vx,Vy 
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+   uint8_t Y = (opcode & 0x00F0u) >> 4u;
+
+   if(V[Y] > V[X]) V[0x000Fu] = 1;
+   else V[0x000Fu] = 0;
+
+   V[X] = V[Y] - V[X];
+}
+
+void Chip8::op8XYE(){//SHL Vx {, Vy}
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+
+   V[0x000Fu] = (V[X] & 0x0080u) >> 7u;
+
+   V[X] <<= 1u;
+}
+
+void Chip8::op9XY0(){//SNE Vx, Vy
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+   uint8_t Y = (opcode & 0x00F0u) >> 4u;
+
+   if(V[X] != V[Y]) PC +=2;
+}
+
+void Chip8::opANNN(){//LD I, addr
+   uint16_t address = (opcode & 0x0FFFu);
+   I = address;
+}
+
+void Chip8::opBNNN(){//JP V0, addr
+   uint16_t address = (opcode & 0x0FFFu);
+   PC = (V[0x0000u] + address);
+}
+
+void Chip8::opCXKK(){//RND Vx, Byte
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+   uint8_t KK = (opcode & 0x00FFu);
+
+   V[X] = randByte(randGen) & KK;
+}
+
+void Chip8::opDXYN(){//DRW Vx, Vy, nibble
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+   uint8_t Y = (opcode & 0x00F0u) >> 4u;
+   uint8_t N = (opcode & 0x000Fu);
+
+   V[0x000Fu] = 0;
+   uint8_t xPos = V[X] % screenWidth;
+   uint8_t yPos = V[Y] % screenHeight;
+   //Making it wrap if exceding screen limits and since VF's value matters we make sure to reset it to default value
+
+   for(unsigned int i = 0; i < N; i++){//I do not understand graphics, so this point onwards, in this function, this is basically a copy paste, not something to be proud of, but I know my shortcomings
+      uint8_t spriteByte = memory[I + i];
+      for(unsigned int j = 0; j < 8; j++){
+         uint8_t spritePixel = spriteByte & (0x0080u >> j);
+         uint32_t* screenPixel = &graphics[(yPos + i) * screenWidth + (xPos + j)];
+         
+         if(spritePixel) if(*screenPixel == 0xFFFFFFFFu) V[0x000Fu] = 1;
+
+         *screenPixel ^= 0xFFFFFFFFu;
+      }
+   }
+
+}
+
+void Chip8::opEX9E(){//SKP Vx
+
+}
+
+void Chip8::opEXA1(){//SKNP Vx
+
+}
+
+void Chip8::opFX07(){//LD Vx, DT
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+   V[X] = DT;
+}
+
+void Chip8::opFX0A(){//LD Vx, K
+
+}
+
+void Chip8::opFX15(){//LD DT, Vx
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+   DT = V[X];
+}
+
+void Chip8::opFX18(){//LD ST, Vx
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+   ST = V[X];
+}
+
+void Chip8::opFX1E(){//ADD I, Vx
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+   I += V[X];
+}

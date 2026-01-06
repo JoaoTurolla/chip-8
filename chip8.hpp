@@ -55,4 +55,41 @@ class Chip8{
    void op8XY5();
    
    void op8XY6();
+
+   void op8XY7();
+
+   void op8XYE();
+
+   void op9XY0();
+
+   void opANNN();
+
+   void opBNNN();
+
+   void opCXKK();
+
+   void opDXYN();
+
+   void opEX9E();
+
+   void opEXA1();
+
+   void opFX07();
+
+   void opFX0A();
+
+   void opFX15();
+
+   void opFX18();
+
+   void opFX1E();
+
+   void opFX29();
+
+   void opFX33();
+
+   void opFX55();
+
+   void opFX65();
+
 };
