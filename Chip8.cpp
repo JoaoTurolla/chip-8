@@ -17,21 +17,22 @@ const unsigned int screenHeight = 32;
  
 
 uint8_t fontset[fontsetSize] ={
-   0xF0, 0x90, 0x90, 0x90, 0xF0,
-   0x20, 0x60, 0x20, 0x20, 0x70,
-   0xF0, 0x10, 0xF0, 0x80, 0xF0,
-   0x90, 0x90, 0xF0, 0x10, 0x10,
-   0xF0, 0x80, 0xF0, 0x10, 0xF0,
-   0xF0, 0x80, 0xF0, 0x90, 0xF0,
-   0xF0, 0x10, 0x20, 0x40, 0x40,
-   0xF0, 0x90, 0xF0, 0x90, 0xF0,
-   0xF0, 0x90, 0xF0, 0x10, 0xF0,
-   0xF0, 0x90, 0xF0, 0x90, 0x90,
-   0xE0, 0x90, 0xE0, 0x90, 0xE0,
-   0xF0, 0x80, 0x80, 0x80, 0xF0,
-   0xE0, 0x90, 0x90, 0x90, 0xE0,
-   0xF0, 0x80, 0xF0, 0x80, 0xF0,
-   0xF0, 0x80, 0xF0, 0x80, 0x80
+	0xF0, 0x90, 0x90, 0x90, 0xF0,
+	0x20, 0x60, 0x20, 0x20, 0x70,
+	0xF0, 0x10, 0xF0, 0x80, 0xF0,
+	0xF0, 0x10, 0xF0, 0x10, 0xF0,
+	0x90, 0x90, 0xF0, 0x10, 0x10,
+	0xF0, 0x80, 0xF0, 0x10, 0xF0,
+	0xF0, 0x80, 0xF0, 0x90, 0xF0,
+	0xF0, 0x10, 0x20, 0x40, 0x40,
+	0xF0, 0x90, 0xF0, 0x90, 0xF0,
+	0xF0, 0x90, 0xF0, 0x10, 0xF0,
+	0xF0, 0x90, 0xF0, 0x90, 0x90,
+	0xE0, 0x90, 0xE0, 0x90, 0xE0,
+	0xF0, 0x80, 0x80, 0x80, 0xF0,
+	0xE0, 0x90, 0x90, 0x90, 0xE0,
+	0xF0, 0x80, 0xF0, 0x80, 0xF0,
+	0xF0, 0x80, 0xF0, 0x80, 0x80
 };
 
 Chip8::Chip8() : randGen(std::chrono::system_clock::now().time_since_epoch().count()){
@@ -259,7 +260,7 @@ void Chip8::opDXYN(){//DRW Vx, Vy, nibble
    uint8_t yPos = V[Y] % screenHeight;
    //Making it wrap if exceding screen limits and since VF's value matters we make sure to reset it to default value
 
-   for(unsigned int i = 0; i < N; i++){//I do not understand graphics, so this point onwards, in this function, this is basically a copy paste, not something to be proud of, but I know my shortcomings
+   for(unsigned int i = 0; i < N; i++){
       uint8_t spriteByte = memory[I + i];
       for(unsigned int j = 0; j < 8; j++){
          uint8_t spritePixel = spriteByte & (0x0080u >> j);
@@ -274,11 +275,15 @@ void Chip8::opDXYN(){//DRW Vx, Vy, nibble
 }
 
 void Chip8::opEX9E(){//SKP Vx
-
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+   uint8_t key = V[X];
+   if(keypad[key]) PC +=2;
 }
 
 void Chip8::opEXA1(){//SKNP Vx
-
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+   uint8_t key = V[X];
+   if(!(keypad[key])) PC +=2;
 }
 
 void Chip8::opFX07(){//LD Vx, DT
@@ -287,7 +292,25 @@ void Chip8::opFX07(){//LD Vx, DT
 }
 
 void Chip8::opFX0A(){//LD Vx, K
-
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+   
+   if(keypad[0x0000u]) V[X] = 0;
+   else if(keypad[0x0001u]) V[X] = 1;
+   else if(keypad[0x0002u]) V[X] = 2;
+   else if(keypad[0x0003u]) V[X] = 3;
+   else if(keypad[0x0004u]) V[X] = 4;
+   else if(keypad[0x0005u]) V[X] = 5;
+   else if(keypad[0x0006u]) V[X] = 6;
+   else if(keypad[0x0007u]) V[X] = 7;
+   else if(keypad[0x0008u]) V[X] = 8;
+   else if(keypad[0x0009u]) V[X] = 9;
+   else if(keypad[0x000Au]) V[X] = 10;
+   else if(keypad[0x000Bu]) V[X] = 11;
+   else if(keypad[0x000Cu]) V[X] = 12;
+   else if(keypad[0x000Du]) V[X] = 13;
+   else if(keypad[0x000Eu]) V[X] = 14;
+   else if(keypad[0x000Fu]) V[X] = 15;
+   else PC -=2;
 }
 
 void Chip8::opFX15(){//LD DT, Vx
@@ -304,3 +327,37 @@ void Chip8::opFX1E(){//ADD I, Vx
    uint8_t X = (opcode & 0x0F00u) >> 8u;
    I += V[X];
 }
+
+void Chip8::opFX29(){//LD F, Vx
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+
+   I = fontsetStartAddress + (V[X] * 5);
+}
+
+void Chip8::opFX33(){//LD B, Vx
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+   uint8_t digit = V[X];
+
+   memory[I + 2] = digit % 10;
+   digit /= 10;
+   memory[I + 1] = digit % 10;
+   digit /= 10;
+   memory[I] = digit % 10;
+   //Let's not talk about how I made it store only the hundreds the first time I coded this...
+}
+
+void Chip8::opFX55(){//LD [I], Vx
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+
+   for(unsigned int i = 0; i <= V[X]; ++i){
+      memory[I + i] = V[i];
+   }
+}
+
+void Chip8::opFX65(){
+   uint8_t X = (opcode & 0x0F00u) >> 8u;
+
+   for(unsigned int i = 0; i <= V[X]; ++i){
+      V[i] = memory[I + i];
+   }
+} 
