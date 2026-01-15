@@ -13,7 +13,7 @@ Notes: I'll use this one mainly to check the graphics and file handling code as 
 
 -Cowgod's Chip-8 Technical Reference v1.0:
 
-http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.0 last access: 2026-01-07
+http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.0 last access: 2026-01-015
 
 Notes: This technical reference will be my main source of info for the challenge, may change it as I see fit while
 looking for more documention on Chip-8, if I do change it there will be updates and additions to this file, but never
