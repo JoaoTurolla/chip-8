@@ -4,10 +4,12 @@
 #include <fstream>
 #include <chrono>
 
-//After working on this for 4 weeks (reason on README) I realised I might've made a mistake and shouldn't have all the code on the hpp file
-//It was kind of hard keeping track of what I was declaring and what I needed to define, be it functions or whatever
-//So I decided to split it into two files, one to declare everything, and this one to define everything
-//And now I think I understood why use a constructor 
+/*
+After working on this for 4 weeks (reason on README) I realised I might've made a mistake and shouldn't have all the code on the hpp file
+It was kind of hard keeping track of what I was declaring and what I needed to define, be it functions or whatever
+So I decided to split it into two files, one to declare everything, and this one to define everything
+And now I think I understood why use a constructor 
+*/
 
 const unsigned int fontsetSize = 80;
 const unsigned int fontsetStartAddress = 0x50;
@@ -42,12 +44,9 @@ Chip8::Chip8() : randGen(std::chrono::system_clock::now().time_since_epoch().cou
    for(unsigned int i = 0; i < fontsetSize; i++) memory[fontsetStartAddress + i] = fontset[i];
       
    randByte = std::uniform_int_distribution<uint8_t>(0, 255U);
-      
-   //So, I don't quite understand yet why do I need the constructor to set everything to it's starting value, but since my reference did it
-   //for now I'll simply use it too.
 
-   opcode = 0; 
-   I = 0;
+   opcode = 0x0000u; 
+   I = 0x0000u;
    SP = 0;
 
    for(unsigned int i = 0; i < 0x1000u; i++) memory[i] = 0;
@@ -72,32 +71,155 @@ void Chip8::loadROM(const char* fileName){
 
       file.seekg(0, std::ios::beg); //Got stuck here after 2 hours trying, not really used to file handling.
       // Well, if I open a file surely I would read it... why didn't I do that earlier? Idk
-      file.read(buffer, size); //since size should compreheend the whole file, this should read all at once
+      file.read(buffer, size); //since size should compreheend the whole file now, this should read all at once
       file.close();
 
-      for(long i = 0; i < size; i++) memory[startAddress + i] = buffer[i]; 
+      for(int32_t i = 0; i < size; i++) memory[startAddress + i] = buffer[i];
       
       delete[] buffer;
    }
 }
 
 void Chip8::Cycle(){
-   //Ok, based on what I've learned so far, I'll need to code the Fetch Decode Execute sequence here, but first I gotta understand how to
-   //manipulate the memory and decide which registers will be used...
+
+   //Fetch
+   opcode = (memory[PC] << 8u) | memory[PC + 1]; //I initially used + instead of |, which I discovered to be fine in this scenario where there will be no overlapping bits, but I prefered to correct it
+
+   PC+=2;
+
+   //Decode and Execute
+   switch(opcode & 0xF000u){//I kinda regret doing these switches... doesn't look as optimal as I thought I could do
+      case 0x0000u:
+      switch(opcode & 0x000Fu){
+         case 0x000Eu:
+         op00EE();
+         break;
+         default:
+         op00E0();
+      }
+      break;
+      case 0x1000u:
+      op1NNN();
+      break;
+      case 0x2000u:
+      op2NNN();
+      break;
+      case 0x3000u:
+      op3XKK();
+      break;
+      case 0x4000u:
+      op4XKK();
+      break;
+      case 0x5000u:
+      op5XY0();
+      break;
+      case 0x6000u:
+      op6XKK();
+      break;
+      case 0x7000u:
+      op7XKK();
+      break;
+      case 0x8000u:
+      switch(opcode & 0x000Fu){
+         case 0x0000u:
+         op8XY0();
+         break;
+         case 0x0001u:
+         op8XY1();
+         break;
+         case 0x0002u:
+         op8XY2();
+         break;
+         case 0x0003u:
+         op8XY3();
+         break;
+         case 0x0004u:
+         op8XY4();
+         break;
+         case 0x0005u:
+         op8XY5();
+         break;
+         case 0x0006u:
+         op8XY6();
+         break;
+         case 0x0007u:
+         op8XY7();
+         break;
+         default:
+         op8XYE();
+         break;
+      }
+      break;
+      case 0x9000u:
+      op9XY0();
+      break;
+      case 0xA000u:
+      opANNN();
+      break;
+      case 0xB000u:
+      opBNNN();
+      break;
+      case 0xC000u:
+      opCXKK();
+      break;
+      case 0xD000u:
+      opDXYN();
+      break;
+      case 0xE000u:
+      switch(opcode & 0x000Fu){
+         case 0x000Eu:
+         opEX9E();
+         break;
+         default:
+         opEXA1();
+         break;
+      }
+      break;
+      case 0xF000u:
+      switch(opcode & 0x00FFu){
+         case 0x0007u:
+         opFX07();
+         break;
+         case 0x000Au:
+         opFX0A();
+         break;
+         case 0x0015u:
+         opFX15();
+         break;
+         case 0x0018u:
+         opFX18();
+         break;
+         case 0x001Eu:
+         opFX1E();
+         break;
+         case 0x0029u:
+         opFX29();
+         break;
+         case 0x0033u:
+         opFX33();
+         break;
+         case 0x0055u:
+         opFX55();
+         break;
+         default:
+         opFX65();
+         break;
+      }
+      break;
+      default: 
+      break;
+   }
+   
+   if(DT > 0) --DT;
+   if(ST > 0) --ST;
 };
 
-//Not sure how would I read the opcode yet, but thought it would be nice to have the codes ready for when I do
-//Hopefully I make them right on my first try 
-
-//First things first, there are a lot of errors for now cause I still need to compreheend how to make this work WITHOUT passing any parameters
-//So I'll leave it like this for a bit cause I want to still have a reference as to how it should somewhat behave
-
-void Chip8::op0NNN(){//SYS addr, jump to a machine code routine at NNN; ignored in modern interpreters
+void Chip8::op0NNN(){//SYS addr; jump to a machine code routine at NNN; ignored in modern interpreters
    uint16_t address = opcode & 0x0FFFu;
    PC = address;
 }
 
-void Chip8::op00E0(){//CLS, clear the display; I assume reseting should do it?
+void Chip8::op00E0(){//CLS; clear the display; I assume resetting everything to 0 should do it?
    for(unsigned int i = 0; i < 0x0800u; i++) graphics[i] = 0;
 }
 
@@ -106,12 +228,12 @@ void Chip8::op00EE(){//RET, return
    PC = Stack[SP];
 }
 
-void Chip8::op1NNN(){//JP addr, jump to location NNN, seems like the same as 0NNN? Could it be why it's ignored in modern interpreters?
-   uint16_t address = opcode & 0x0FFFu; //OK, it took me quite some time to figure how this works. So 0xFFFu is : 0000 1111 1111 1111 in binary, which means only the address 
-   PC = address; // in the opcode will stay after the bit by bit AND operation, then we pass that to the PC;
+void Chip8::op1NNN(){//JP addr; jump to location NNN, seems like the same as 0NNN? Could it be why it's ignored in modern interpreters?
+   uint16_t address = opcode & 0x0FFFu; //OK, it took me quite some time to figure how this works. So 0x0FFFu is : 0000 1111 1111 1111 in binary, which means only the address in the opcode will stay after the bit by bit AND operation, then we pass that to the PC; 
+   PC = address; 
 }
 
-void Chip8::op2NNN(){//CALL addr, call subroutine at NNN
+void Chip8::op2NNN(){//CALL addr; call subroutine at NNN
    uint16_t address = opcode & 0x0FFFu; //after figuring out how the above works, this one was easy
    Stack[SP] = PC;
    ++SP;
@@ -205,7 +327,7 @@ void Chip8::op8XY6(){//SHR Vx
    if(V[X] & 1) V[0x000Fu] = 1;
    else V[0x000fu] = 0; //if the least significant bit is 1, V[F] will be one, otherwise 0.   
 
-   V[X] >>= 1u;// as for this line I had to check on my reference how he did it, it didn't cross my mind to bit shift to make the division.
+   V[X] >>= 1u;
 }
 
 void Chip8::op8XY7(){//SUBN Vx,Vy 
