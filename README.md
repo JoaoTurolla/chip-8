@@ -8,6 +8,8 @@ to not depend on Youtube videos that explain how it works, nor any "AI" that cou
 
 Important info:
   To run the program and interact with it you will need a ROM.
+  If you already have a ROM, put the file in the same folder as the executable, go to that folder through your terminal and type the comand: 
+  ./Chip8 <videoScale>(recommended is 10) <cycleDelay>(recommended is 3) ROMname
   
   If you look at my CMakeLists.txt you will see there is a /thirdParty folder that's not here, you need
 to download those libraries by yourself in their respective github repositories and put in a file with the same name (or change the name to whatever you like), else the program won't have the GUI.
