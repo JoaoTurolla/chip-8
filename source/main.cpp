@@ -25,7 +25,7 @@ int main(int argc, char** argv){
 
 	bool quitToggler = false;
 	auto lastCycleTime = std::chrono::high_resolution_clock::now();
-	int instructionsPerFrame = 2;
+	int instructionsPerFrame = 10;
 
 	while (!quitToggler){
 		quitToggler = platform.ProcessInput(chip8.keypad);
